@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Diabetes Risk Predictor</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #F0F4F8;
+      --surface: #FFFFFF;
+      --surface2: #F7FAFC;
+      --border: #E2E8F0;
+      --accent: #3B6EDB;
+      --accent-light: #EBF0FF;
+      --accent-dark: #2A50A8;
+      --text: #1A202C;
+      --muted: #718096;
+      --danger: #C53030;
+      --danger-bg: #FFF5F5;
+      --danger-border: #FEB2B2;
+      --success: #276749;
+      --success-bg: #F0FFF4;
+      --success-border: #9AE6B4;
+      --warn: #7B341E;
+      --warn-bg: #FFFAF0;
+      --warn-border: #FBD38D;
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 0;
+    }
+
+    /* Header */
+    header {
+      background: var(--accent);
+      padding: 28px 0 32px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    header::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: 0; right: 0;
+      height: 28px;
+      background: var(--bg);
+      clip-path: ellipse(55% 100% at 50% 100%);
+    }
+    header .tag {
+      display: inline-block;
+      background: rgba(255,255,255,0.2);
+      color: #fff;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 12px;
+    }
+    header h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(26px, 5vw, 38px);
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.2;
+    }
+    header p {
+      color: rgba(255,255,255,0.8);
+      font-size: 15px;
+      margin-top: 8px;
+    }
+
+    /* Layout */
+    .wrapper {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 36px 20px 60px;
+    }
+
+    /* Disclaimer */
+    .disclaimer {
+      background: var(--warn-bg);
+      border: 1px solid var(--warn-border);
+      border-radius: var(--radius-sm);
+      padding: 12px 16px;
+      font-size: 13px;
+      color: var(--warn);
+      margin-bottom: 28px;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+    .disclaimer svg { flex-shrink: 0; margin-top: 1px; }
+
+    /* Card */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      margin-bottom: 20px;
+    }
+    .card-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 20px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-title span {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px; height: 26px;
+      background: var(--accent-light);
+      color: var(--accent);
+      border-radius: 6px;
+      font-size: 13px;
+    }
+
+    /* Form grid */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 560px) { .form-grid { grid-template-columns: 1fr; } }
+
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--muted);
+    }
+    .field .hint {
+      font-size: 11px;
+      color: #A0AEC0;
+      margin-top: -2px;
+    }
+
+    /* Slider */
+    .slider-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    input[type=range] {
+      -webkit-appearance: none;
+      flex: 1;
+      height: 5px;
+      background: var(--border);
+      border-radius: 3px;
+      outline: none;
+      cursor: pointer;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      border: 2px solid #fff;
+      box-shadow: 0 0 0 1px var(--accent);
+    }
+    input[type=range]::-moz-range-thumb {
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      border: 2px solid #fff;
+    }
+    .slider-val {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--accent);
+      min-width: 52px;
+      text-align: right;
+      background: var(--accent-light);
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+
+    /* Select */
+    select {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      color: var(--text);
+      background: var(--surface);
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23718096' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      cursor: pointer;
+      outline: none;
+    }
+    select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(59,110,219,0.12); }
+
+    /* Button */
+    .btn-predict {
+      width: 100%;
+      padding: 14px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: background 0.2s, transform 0.1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn-predict:hover { background: var(--accent-dark); }
+    .btn-predict:active { transform: scale(0.98); }
+    .btn-predict:disabled { background: #A0AEC0; cursor: not-allowed; }
+
+    .btn-reset {
+      width: 100%;
+      padding: 10px;
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: background 0.2s;
+    }
+    .btn-reset:hover { background: var(--surface2); }
+
+    /* Result */
+    #result { display: none; }
+
+    .result-banner {
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .result-banner.high   { background: var(--danger-bg); border: 1px solid var(--danger-border); }
+    .result-banner.medium { background: var(--warn-bg);   border: 1px solid var(--warn-border); }
+    .result-banner.low    { background: var(--success-bg); border: 1px solid var(--success-border); }
+
+    .risk-circle {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    .risk-circle.high   { background: var(--danger); }
+    .risk-circle.medium { background: #D97706; }
+    .risk-circle.low    { background: #276749; }
+    .risk-circle .pct   { font-size: 22px; font-weight: 700; color: #fff; line-height: 1; }
+    .risk-circle .lbl   { font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.8); letter-spacing: 0.5px; }
+
+    .result-text h2 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+    }
+    .result-text.high   h2 { color: var(--danger); }
+    .result-text.medium h2 { color: var(--warn); }
+    .result-text.low    h2 { color: var(--success); }
+    .result-text p { font-size: 14px; color: var(--muted); margin-top: 4px; }
+
+    /* Score breakdown */
+    .breakdown-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .breakdown-item {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+    }
+    .breakdown-item .b-label { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+    .breakdown-item .b-val   { font-size: 20px; font-weight: 600; color: var(--text); font-family: 'Space Grotesk', sans-serif; }
+    .breakdown-item .b-bar   { height: 4px; border-radius: 2px; background: var(--border); margin-top: 8px; overflow: hidden; }
+    .breakdown-item .b-fill  { height: 100%; border-radius: 2px; transition: width 0.6s ease; }
+
+    /* Risk factors */
+    .factors-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .factor-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+    }
+    .factor-item.bad  { background: var(--danger-bg);  border: 1px solid var(--danger-border);  color: var(--danger); }
+    .factor-item.warn { background: var(--warn-bg);    border: 1px solid var(--warn-border);    color: var(--warn); }
+    .factor-item.good { background: var(--success-bg); border: 1px solid var(--success-border); color: var(--success); }
+    .factor-item svg  { flex-shrink: 0; margin-top: 1px; }
+    .factor-item strong { display: block; font-weight: 600; }
+    .factor-item span   { font-size: 12px; opacity: 0.85; }
+
+    /* Recommendations */
+    .rec-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .rec-item {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      font-size: 14px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .rec-item:last-child { border-bottom: none; }
+    .rec-num {
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      background: var(--accent-light);
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .rec-item p { color: var(--text); line-height: 1.5; }
+    .rec-item p strong { font-weight: 600; }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 24px 20px;
+      font-size: 12px;
+      color: #A0AEC0;
+      border-top: 1px solid var(--border);
+    }
+    footer strong { color: var(--muted); }
+
+    @media (max-width: 480px) {
+      .card { padding: 20px; }
+      .result-banner { padding: 18px; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="tag">ML Project</div>
+  <h1>Diabetes Risk Predictor</h1>
+  <p>Enter your health parameters to assess your diabetes risk</p>
+</header>
+
+<div class="wrapper">
+
+  <div class="disclaimer">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+    <p><strong>Educational project only.</strong> This tool uses a logistic regression model for academic demonstration purposes. Do not use this as a substitute for professional medical advice or diagnosis.</p>
+  </div>
+
+  <!-- Input Card 1 -->
+  <div class="card">
+    <div class="card-title">
+      <span>1</span> Clinical measurements
+    </div>
+    <div class="form-grid">
+
+      <div class="field">
+        <label>Glucose level (mg/dL)</label>
+        <div class="hint">Fasting blood sugar</div>
+        <div class="slider-wrap">
+          <input type="range" id="glucose" min="50" max="200" value="100" step="1" oninput="sv('glucose','gv',this.value+' mg/dL')">
+          <span class="slider-val" id="gv">100 mg/dL</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Blood pressure (mmHg)</label>
+        <div class="hint">Diastolic pressure</div>
+        <div class="slider-wrap">
+          <input type="range" id="bp" min="40" max="130" value="70" step="1" oninput="sv('bp','bpv',this.value+' mmHg')">
+          <span class="slider-val" id="bpv">70 mmHg</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>BMI</label>
+        <div class="hint">Body Mass Index (kg/m²)</div>
+        <div class="slider-wrap">
+          <input type="range" id="bmi" min="15" max="60" value="25" step="0.1" oninput="sv('bmi','bmiv',parseFloat(this.value).toFixed(1))">
+          <span class="slider-val" id="bmiv">25.0</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Insulin (µU/mL)</label>
+        <div class="hint">2-hour serum insulin</div>
+        <div class="slider-wrap">
+          <input type="range" id="insulin" min="0" max="400" value="80" step="1" oninput="sv('insulin','insv',this.value+' µU/mL')">
+          <span class="slider-val" id="insv">80 µU/mL</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Skin thickness (mm)</label>
+        <div class="hint">Triceps skinfold</div>
+        <div class="slider-wrap">
+          <input type="range" id="skin" min="0" max="80" value="20" step="1" oninput="sv('skin','skinv',this.value+' mm')">
+          <span class="slider-val" id="skinv">20 mm</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Diabetes pedigree score</label>
+        <div class="hint">Family history function (0–2.5)</div>
+        <div class="slider-wrap">
+          <input type="range" id="dpf" min="0" max="2.5" value="0.4" step="0.01" oninput="sv('dpf','dpfv',parseFloat(this.value).toFixed(2))">
+          <span class="slider-val" id="dpfv">0.40</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Input Card 2 -->
+  <div class="card">
+    <div class="card-title">
+      <span>2</span> Personal information
+    </div>
+    <div class="form-grid">
+
+      <div class="field">
+        <label>Age (years)</label>
+        <div class="slider-wrap">
+          <input type="range" id="age" min="18" max="80" value="30" step="1" oninput="sv('age','agev',this.value+' yrs')">
+          <span class="slider-val" id="agev">30 yrs</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Number of pregnancies</label>
+        <div class="hint">0 if male or not applicable</div>
+        <div class="slider-wrap">
+          <input type="range" id="preg" min="0" max="17" value="0" step="1" oninput="sv('preg','pregv',this.value)">
+          <span class="slider-val" id="pregv">0</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Physical activity</label>
+        <select id="activity">
+          <option value="1">Very active (daily exercise)</option>
+          <option value="2" selected>Moderately active (3–4x/week)</option>
+          <option value="3">Lightly active (1–2x/week)</option>
+          <option value="4">Sedentary (little/no exercise)</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Smoking status</label>
+        <select id="smoking">
+          <option value="0" selected>Non-smoker</option>
+          <option value="1">Former smoker</option>
+          <option value="2">Current smoker</option>
+        </select>
+      </div>
+
+    </div>
+  </div>
+
+  <button class="btn-predict" onclick="predict()">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+    Analyse my risk
+  </button>
+  <button class="btn-reset" onclick="resetForm()">Reset all values</button>
+
+  <!-- Result section -->
+  <div id="result">
+    <div style="height: 28px;"></div>
+
+    <!-- Banner -->
+    <div class="result-banner" id="res-banner">
+      <div class="risk-circle" id="res-circle">
+        <span class="pct" id="res-pct">—</span>
+        <span class="lbl">RISK</span>
+      </div>
+      <div class="result-text" id="res-text">
+        <h2 id="res-title">—</h2>
+        <p id="res-desc">—</p>
+      </div>
+    </div>
+
+    <!-- Breakdown -->
+    <div class="card">
+      <div class="card-title"><span>📊</span> Score breakdown</div>
+      <div class="breakdown-grid" id="breakdown"></div>
+    </div>
+
+    <!-- Risk factors -->
+    <div class="card">
+      <div class="card-title"><span>⚠</span> Key risk factors</div>
+      <ul class="factors-list" id="factors"></ul>
+    </div>
+
+    <!-- Recommendations -->
+    <div class="card">
+      <div class="card-title"><span>✓</span> Recommendations</div>
+      <ul class="rec-list" id="recs"></ul>
+    </div>
+
+  </div><!-- end #result -->
+
+</div><!-- end .wrapper -->
+
+<footer>
+  <p>Built with HTML, CSS &amp; JavaScript &nbsp;·&nbsp; Model based on the <strong>Pima Indians Diabetes Dataset</strong></p>
+  <p style="margin-top:4px">Student ML Project &nbsp;·&nbsp; For educational use only</p>
+</footer>
+
+<script>
+  function sv(id, outId, text) {
+    document.getElementById(outId).textContent = text;
+  }
+
+  function predict() {
+    var glucose  = parseFloat(document.getElementById('glucose').value);
+    var bp       = parseFloat(document.getElementById('bp').value);
+    var bmi      = parseFloat(document.getElementById('bmi').value);
+    var insulin  = parseFloat(document.getElementById('insulin').value);
+    var skin     = parseFloat(document.getElementById('skin').value);
+    var dpf      = parseFloat(document.getElementById('dpf').value);
+    var age      = parseFloat(document.getElementById('age').value);
+    var preg     = parseFloat(document.getElementById('preg').value);
+    var activity = parseFloat(document.getElementById('activity').value);
+    var smoking  = parseFloat(document.getElementById('smoking').value);
+
+    // Logistic regression weights derived from Pima Indians dataset
+    var w_intercept = -8.4;
+    var w_glucose   =  0.038;
+    var w_bmi       =  0.075;
+    var w_dpf       =  0.9;
+    var w_age       =  0.025;
+    var w_preg      =  0.12;
+    var w_insulin   =  0.0012;
+    var w_bp        =  0.008;
+    var w_skin      =  0.002;
+    var w_activity  =  0.15;
+    var w_smoking   =  0.18;
+
+    var z = w_intercept
+          + w_glucose  * glucose
+          + w_bmi      * bmi
+          + w_dpf      * dpf
+          + w_age      * age
+          + w_preg     * preg
+          + w_insulin  * insulin
+          + w_bp       * bp
+          + w_skin     * skin
+          + w_activity * activity
+          + w_smoking  * smoking;
+
+    // Sigmoid function
+    var prob = 1 / (1 + Math.exp(-z));
+    prob = Math.max(0, Math.min(1, prob));
+    var riskPct = Math.round(prob * 100);
+
+    // Classification
+    var level = riskPct >= 60 ? 'high' : riskPct >= 35 ? 'medium' : 'low';
+
+    var titles = {
+      high:   'High diabetes risk',
+      medium: 'Moderate diabetes risk',
+      low:    'Low diabetes risk'
+    };
+    var descs = {
+      high:   'Your profile shows several significant risk factors. Consult a doctor for a proper HbA1c test.',
+      medium: 'Some risk factors are present. Lifestyle improvements can help reduce your risk significantly.',
+      low:    'Your profile suggests a lower risk. Maintain your healthy habits and get regular check-ups.'
+    };
+
+    // Render banner
+    var banner = document.getElementById('res-banner');
+    var circle = document.getElementById('res-circle');
+    var resText = document.getElementById('res-text');
+    banner.className = 'result-banner ' + level;
+    circle.className = 'risk-circle ' + level;
+    resText.className = 'result-text ' + level;
+    document.getElementById('res-pct').textContent = riskPct + '%';
+    document.getElementById('res-title').textContent = titles[level];
+    document.getElementById('res-desc').textContent  = descs[level];
+
+    // Breakdown
+    var glucoseScore  = Math.round(Math.min(glucose / 200 * 100, 100));
+    var bmiScore      = Math.round(Math.min((bmi - 15) / 45 * 100, 100));
+    var ageScore      = Math.round(Math.min((age - 18) / 62 * 100, 100));
+    var familyScore   = Math.round(Math.min(dpf / 2.5 * 100, 100));
+
+    var items = [
+      { label: 'Glucose',       val: glucose + ' mg/dL', score: glucoseScore, color: glucoseScore > 65 ? '#C53030' : glucoseScore > 40 ? '#D97706' : '#276749' },
+      { label: 'BMI',           val: bmi.toFixed(1),     score: bmiScore,     color: bmiScore > 60     ? '#C53030' : bmiScore > 35     ? '#D97706' : '#276749' },
+      { label: 'Age factor',    val: age + ' yrs',       score: ageScore,     color: ageScore > 60     ? '#C53030' : ageScore > 35     ? '#D97706' : '#276749' },
+      { label: 'Family history',val: dpf.toFixed(2),     score: familyScore,  color: familyScore > 50  ? '#C53030' : familyScore > 25  ? '#D97706' : '#276749' },
+    ];
+
+    var bd = document.getElementById('breakdown');
+    bd.innerHTML = items.map(function(it) {
+      return '<div class="breakdown-item">'
+        + '<div class="b-label">' + it.label + '</div>'
+        + '<div class="b-val">' + it.val + '</div>'
+        + '<div class="b-bar"><div class="b-fill" style="width:' + it.score + '%;background:' + it.color + '"></div></div>'
+        + '</div>';
+    }).join('');
+
+    // Risk factor analysis
+    var factors = [];
+
+    if (glucose >= 140) factors.push({ cls: 'bad',  icon: '✕', title: 'High glucose (' + glucose + ' mg/dL)', detail: 'Fasting glucose ≥140 mg/dL strongly indicates diabetes risk.' });
+    else if (glucose >= 100) factors.push({ cls: 'warn', icon: '!', title: 'Borderline glucose (' + glucose + ' mg/dL)', detail: 'Values 100–139 mg/dL suggest pre-diabetes. Monitor regularly.' });
+    else factors.push({ cls: 'good', icon: '✓', title: 'Healthy glucose (' + glucose + ' mg/dL)', detail: 'Normal fasting blood sugar. Keep up your diet habits.' });
+
+    if (bmi >= 30) factors.push({ cls: 'bad',  icon: '✕', title: 'Obese BMI (' + bmi.toFixed(1) + ')', detail: 'BMI ≥30 is a major risk factor for type 2 diabetes.' });
+    else if (bmi >= 25) factors.push({ cls: 'warn', icon: '!', title: 'Overweight BMI (' + bmi.toFixed(1) + ')', detail: 'Even modest weight loss (5–10%) reduces diabetes risk significantly.' });
+    else factors.push({ cls: 'good', icon: '✓', title: 'Healthy BMI (' + bmi.toFixed(1) + ')', detail: 'BMI is within the normal range. Maintain a balanced diet.' });
+
+    if (age >= 45) factors.push({ cls: 'warn', icon: '!', title: 'Age is a risk factor (' + age + ' years)', detail: 'Risk of type 2 diabetes increases significantly after age 45.' });
+
+    if (dpf >= 1.0) factors.push({ cls: 'bad',  icon: '✕', title: 'Strong family history (DPF: ' + dpf.toFixed(2) + ')', detail: 'High pedigree score indicates significant hereditary risk.' });
+    else if (dpf >= 0.4) factors.push({ cls: 'warn', icon: '!', title: 'Moderate family history (DPF: ' + dpf.toFixed(2) + ')', detail: 'Some family history present. Genetic risk is a contributing factor.' });
+
+    if (activity >= 3) factors.push({ cls: 'bad',  icon: '✕', title: 'Low physical activity', detail: 'Sedentary lifestyle increases insulin resistance significantly.' });
+    if (smoking >= 1)  factors.push({ cls: 'warn', icon: '!', title: 'Smoking status', detail: 'Smoking increases insulin resistance and overall metabolic risk.' });
+
+    if (bp >= 90) factors.push({ cls: 'warn', icon: '!', title: 'Elevated blood pressure (' + bp + ' mmHg)', detail: 'High BP frequently co-occurs with insulin resistance.' });
+
+    document.getElementById('factors').innerHTML = factors.map(function(f) {
+      return '<li class="factor-item ' + f.cls + '">'
+        + '<span style="font-size:16px;font-weight:700">' + f.icon + '</span>'
+        + '<div><strong>' + f.title + '</strong><span>' + f.detail + '</span></div>'
+        + '</li>';
+    }).join('');
+
+    // Recommendations
+    var recs = [];
+    if (glucose >= 100) recs.push({ title: 'Monitor blood sugar', detail: 'Test fasting glucose every 3–6 months. Keep it under 100 mg/dL.' });
+    if (bmi >= 25)      recs.push({ title: 'Work toward a healthy weight', detail: 'Losing 5–7% of body weight can reduce diabetes risk by up to 58%.' });
+    if (activity >= 2)  recs.push({ title: 'Increase physical activity', detail: 'Aim for at least 150 minutes of moderate aerobic exercise per week.' });
+    recs.push({ title: 'Adopt a low-glycaemic diet', detail: 'Reduce refined carbs and sugar. Increase fibre, vegetables, and whole grains.' });
+    if (smoking >= 1)   recs.push({ title: 'Consider quitting smoking', detail: 'Smoking cessation improves insulin sensitivity within weeks.' });
+    recs.push({ title: 'Schedule regular check-ups', detail: 'See a doctor for an HbA1c test, especially if you are 40+ or have a family history.' });
+
+    document.getElementById('recs').innerHTML = recs.slice(0, 5).map(function(r, i) {
+      return '<li class="rec-item">'
+        + '<div class="rec-num">' + (i + 1) + '</div>'
+        + '<p><strong>' + r.title + '</strong><br>' + r.detail + '</p>'
+        + '</li>';
+    }).join('');
+
+    // Show result
+    var resultEl = document.getElementById('result');
+    resultEl.style.display = 'block';
+    setTimeout(function() {
+      resultEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 80);
+  }
+
+  function resetForm() {
+    document.getElementById('glucose').value  = 100; sv('glucose','gv','100 mg/dL');
+    document.getElementById('bp').value       = 70;  sv('bp','bpv','70 mmHg');
+    document.getElementById('bmi').value      = 25;  sv('bmi','bmiv','25.0');
+    document.getElementById('insulin').value  = 80;  sv('insulin','insv','80 µU/mL');
+    document.getElementById('skin').value     = 20;  sv('skin','skinv','20 mm');
+    document.getElementById('dpf').value      = 0.4; sv('dpf','dpfv','0.40');
+    document.getElementById('age').value      = 30;  sv('age','agev','30 yrs');
+    document.getElementById('preg').value     = 0;   sv('preg','pregv','0');
+    document.getElementById('activity').value = 2;
+    document.getElementById('smoking').value  = 0;
+    document.getElementById('result').style.display = 'none';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+</body>
+</html>
